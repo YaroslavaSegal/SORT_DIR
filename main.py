@@ -75,12 +75,15 @@ def main(folder_path, root_folder):
     for file in scan.others:
         handle_file(file, root_folder, "other")
 
-    try:
+    if len(os.listdir(folder_path)) == 0:
         remove_empty_folders(folder_path)
-    except OSError:
-        nonempty(folder_path)
-        for element in non_empty:
-            main(element, root_folder)
+    else:
+        for element in folder_path:
+            if len(os.listdir(element)) == 0:
+                remove_empty_folders(element)
+            while len(os.listdir(element)) != 0:
+                main(element, root_folder)
+            remove_empty_folders(element)
 
 
 if __name__ == '__main__':
