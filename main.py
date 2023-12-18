@@ -1,7 +1,7 @@
 import sys
 import shutil
 from pathlib import Path
-
+import os
 import scan
 import normalize
 
@@ -46,14 +46,14 @@ non_empty = list()
 def nonempty(folder):
     global non_empty
     for elem in folder.iterdir():
-        try:
+        if len(os.listdir(elem)) == 0:
             remove_empty_folders(elem)
-        except OSError:
+        else:
             non_empty.append(elem)
             nonempty(elem)
     return non_empty
 
-def main(folder_path):
+def main(folder_path, root_folder):
     # print(folder_path)
     scan.scan(folder_path)
     images_files = scan.jpeg_files + scan.jpg_files + scan.png_files + scan.svg_files
@@ -69,18 +69,18 @@ def main(folder_path):
     for file in known_extension:
         for key, value in dict_files.items():
             if file in value:
-                handle_file(file, folder_path, key)
+                handle_file(file, root_folder, key)
             elif file in archive_files:
-                handle_archive(file, folder_path, 'archives')
+                handle_archive(file, root_folder, 'archives')
     for file in scan.others:
-            handle_file(file, folder_path, "other")
+        handle_file(file, root_folder, "other")
 
     try:
         remove_empty_folders(folder_path)
     except OSError:
         nonempty(folder_path)
         for element in non_empty:
-            main(element)
+            main(element, root_folder)
 
 
 if __name__ == '__main__':
@@ -89,7 +89,7 @@ if __name__ == '__main__':
 
     folder = Path(path)
 
-    main(folder.resolve())
+    main(folder.resolve(), folder.resolve())
     for item in folder.iterdir():
         print(item.name, end=' ')
         for file in item.iterdir():
