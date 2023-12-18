@@ -63,9 +63,11 @@ def main(folder_path):
             elif file in archive_files:
                 handle_archive(file, folder_path, 'archives')
                 new_folder = folder_path / 'archives'
-                scan.scan(new_folder)
-                for file in archive_files:
-                    handle_archive(file, new_folder, 'archives')
+                for elem in new_folder.iterdir():
+                    if elem.name.endswith(".zip"):
+                        handle_archive(elem, new_folder, 'archives')
+                    remove_empty_folders(new_folder)
+
 
 
     for file in scan.others:
@@ -81,9 +83,9 @@ if __name__ == '__main__':
     folder = Path(path)
 
     main(folder.resolve())
-    for item in os.walk(folder):
+    for item in folder.iterdir():
         print(item.name, end=' ')
-        for file in os.walk(item):
+        for file in item.iterdir():
             print(file.name, end=" ")
         print("")
 
