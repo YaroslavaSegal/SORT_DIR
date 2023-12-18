@@ -27,6 +27,7 @@ others = list()
 unknown = set()
 extensions = set()
 
+
 registered_extensions = {
     'JPEG': jpeg_files,
     'PNG': png_files,

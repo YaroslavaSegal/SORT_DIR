@@ -1,8 +1,6 @@
 import sys
 import shutil
 from pathlib import Path
-import os
-
 
 import scan
 import normalize
@@ -35,7 +33,6 @@ def handle_archive(path, root_folder, dist):
         return
     path.unlink()
 
-
 def remove_empty_folders(path):
     for item in path.iterdir():
         if item.is_dir():
@@ -44,6 +41,7 @@ def remove_empty_folders(path):
                 item.rmdir()
             except OSError:
                 pass
+
 non_empty = list()
 def nonempty(folder):
     global non_empty
@@ -55,10 +53,6 @@ def nonempty(folder):
             nonempty(elem)
     return non_empty
 
-
-
-
-
 def main(folder_path):
     # print(folder_path)
     scan.scan(folder_path)
@@ -67,7 +61,9 @@ def main(folder_path):
     audio_files = scan.mp3_files + scan.ogg_files + scan.wav_files + scan.amr_files
     video_files = scan.avi_files + scan.mp4_files + scan.mov_files + scan.mkv_files
     archive_files = scan.zip_files + scan.gz_files + scan.tar_files
+
     known_extension = images_files + documents_files + audio_files + video_files + archive_files
+
     dict_files = {"images": images_files, "documents": documents_files, 'audio': audio_files, 'video': video_files}
 
     for file in known_extension:
@@ -76,14 +72,6 @@ def main(folder_path):
                 handle_file(file, folder_path, key)
             elif file in archive_files:
                 handle_archive(file, folder_path, 'archives')
-                new_folder = folder_path / 'archives'
-                for elem in new_folder.iterdir():
-                    if elem.name.endswith(".zip"):
-                        handle_archive(elem, new_folder, 'archives')
-                    remove_empty_folders(new_folder)
-
-
-
     for file in scan.others:
             handle_file(file, folder_path, "other")
 
@@ -93,15 +81,6 @@ def main(folder_path):
         nonempty(folder_path)
         for element in non_empty:
             main(element)
-            try:
-                remove_empty_folders(element)
-            except OSError:
-                nonempty(element)
-                for el in non_empty:
-                    main(el)
-                    remove_empty_folders(el)
-
-
 
 
 if __name__ == '__main__':
