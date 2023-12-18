@@ -16,11 +16,11 @@ def handle_archive(path, root_folder, dist):
     target_folder = root_folder / dist
     target_folder.mkdir(exist_ok=True)
     if path.name.endswith('.zip'):
-        new_name = normalize.normalize(path.name.replace(".zip", ''))
+        new_name = normalize.normalize(path.name).replace(".zip", '')
     elif path.name.endswith('.gz'):
-        new_name = normalize.normalize(path.name.replace(".gz", ''))
+        new_name = normalize.normalize(path.name).replace(".gz", '')
     elif path.name.endswith('.tar'):
-        new_name = normalize.normalize(path.name.replace(".tar", ''))
+        new_name = normalize.normalize(path.name).replace(".tar", '')
 
     archive_folder = target_folder / new_name
     archive_folder.mkdir(exist_ok=True)
