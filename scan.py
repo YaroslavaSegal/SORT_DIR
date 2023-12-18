@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-
 jpeg_files = list()
 png_files = list()
 jpg_files = list()

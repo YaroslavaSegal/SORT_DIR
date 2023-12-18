@@ -2,6 +2,7 @@ import sys
 import shutil
 from pathlib import Path
 
+
 import scan
 import normalize
 
@@ -13,11 +14,11 @@ def handle_file(path, root_folder, dist):
 def handle_archive(path, root_folder, dist):
     target_folder = root_folder / dist
     target_folder.mkdir(exist_ok=True)
-    if str(path.name).endswith('zip'):
+    if str(path.name).endswith('.zip'):
         new_name = normalize.normalize(path.name.replace(".zip", ''))
-    elif str(path.name).endswith('gz'):
+    elif str(path.name).endswith('.gz'):
         new_name = normalize.normalize(path.name.replace(".gz", ''))
-    elif str(path.name).endswith('tar'):
+    elif str(path.name).endswith('.tar'):
         new_name = normalize.normalize(path.name.replace(".tar", ''))
 
     archive_folder = target_folder / new_name
