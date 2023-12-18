@@ -48,24 +48,28 @@ def remove_empty_folders(path):
 def main(folder_path):
     # print(folder_path)
     scan.scan(folder_path)
+    images_files = scan.jpeg_files + scan.jpg_files + scan.png_files + scan.svg_files
+    documents_files = scan.txt_files + scan.doc_files + scan.docx_files + scan.pdf_files + scan.xlsx_files + scan.pptx_files
+    audio_files = scan.mp3_files + scan.ogg_files + scan.wav_files + scan.amr_files
+    video_files = scan.avi_files + scan.mp4_files + scan.mov_files + scan.mkv_files
+    archive_files = scan.zip_files + scan.gz_files + scan.tar_files
+    known_extension = images_files + documents_files + audio_files + video_files + archive_files
 
-    for file in (scan.jpeg_files + scan.jpg_files + scan.png_files + scan.svg_files):
-        handle_file(file, folder_path, "images")
-
-    for file in (scan.txt_files + scan.doc_files + scan.docx_files + scan.pdf_files + scan.xlsx_files + scan.pptx_files):
-        handle_file(file, folder_path, "documents")
-
-    for file in scan.mp3_files + scan.ogg_files + scan.wav_files + scan.amr_files:
-        handle_file(file, folder_path, 'audio')
-
-    for file in scan.avi_files + scan.mp4_files + scan.mov_files + scan.mkv_files:
-        handle_file(file, folder_path, 'video')
-
-    for file in scan.zip_files + scan.gz_files + scan.tar_files:
-        handle_archive(file, folder_path, 'archives')
+    for file in known_extension:
+        if file in images_files:
+            handle_file(file, folder_path, "images")
+        elif file in documents_files:
+            handle_file(file, folder_path, "documents")
+        elif file in audio_files:
+            handle_file(file, folder_path, 'audio')
+        elif file in video_files:
+            handle_file(file, folder_path, 'video')
+        else:
+            if file in archive_files:
+                handle_archive(file, folder_path, 'archives')
 
     for file in scan.others:
-        handle_file(file, folder_path, "other")
+            handle_file(file, folder_path, "other")
 
     remove_empty_folders(folder_path)
 
