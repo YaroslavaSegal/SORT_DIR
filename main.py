@@ -44,6 +44,19 @@ def remove_empty_folders(path):
                 item.rmdir()
             except OSError:
                 pass
+non_empty = list()
+def nonempty(folder):
+    global non_empty
+    for elem in folder.iterdir():
+        try:
+            remove_empty_folders(elem)
+        except OSError:
+            non_empty.append(elem)
+            nonempty(elem)
+    return non_empty
+
+
+
 
 
 def main(folder_path):
@@ -56,6 +69,7 @@ def main(folder_path):
     archive_files = scan.zip_files + scan.gz_files + scan.tar_files
     known_extension = images_files + documents_files + audio_files + video_files + archive_files
     dict_files = {"images": images_files, "documents": documents_files, 'audio': audio_files, 'video': video_files}
+
     for file in known_extension:
         for key, value in dict_files.items():
             if file in value:
@@ -73,7 +87,21 @@ def main(folder_path):
     for file in scan.others:
             handle_file(file, folder_path, "other")
 
-    remove_empty_folders(folder_path)
+    try:
+        remove_empty_folders(folder_path)
+    except OSError:
+        nonempty(folder_path)
+        for element in non_empty:
+            main(element)
+            try:
+                remove_empty_folders(element)
+            except OSError:
+                nonempty(element)
+                for el in non_empty:
+                    main(el)
+                    remove_empty_folders(el)
+
+
 
 
 if __name__ == '__main__':
