@@ -1,6 +1,7 @@
 import sys
 import shutil
 from pathlib import Path
+import os
 
 
 import scan
@@ -14,11 +15,11 @@ def handle_file(path, root_folder, dist):
 def handle_archive(path, root_folder, dist):
     target_folder = root_folder / dist
     target_folder.mkdir(exist_ok=True)
-    if str(path.name).endswith('.zip'):
+    if path.name.endswith('.zip'):
         new_name = normalize.normalize(path.name.replace(".zip", ''))
-    elif str(path.name).endswith('.gz'):
+    elif path.name.endswith('.gz'):
         new_name = normalize.normalize(path.name.replace(".gz", ''))
-    elif str(path.name).endswith('.tar'):
+    elif path.name.endswith('.tar'):
         new_name = normalize.normalize(path.name.replace(".tar", ''))
 
     archive_folder = target_folder / new_name
@@ -54,19 +55,18 @@ def main(folder_path):
     video_files = scan.avi_files + scan.mp4_files + scan.mov_files + scan.mkv_files
     archive_files = scan.zip_files + scan.gz_files + scan.tar_files
     known_extension = images_files + documents_files + audio_files + video_files + archive_files
-
+    dict_files = {"images": images_files, "documents": documents_files, 'audio': audio_files, 'video': video_files}
     for file in known_extension:
-        if file in images_files:
-            handle_file(file, folder_path, "images")
-        elif file in documents_files:
-            handle_file(file, folder_path, "documents")
-        elif file in audio_files:
-            handle_file(file, folder_path, 'audio')
-        elif file in video_files:
-            handle_file(file, folder_path, 'video')
-        else:
-            if file in archive_files:
+        for key, value in dict_files.items():
+            if file in value:
+                handle_file(file, folder_path, key)
+            elif file in archive_files:
                 handle_archive(file, folder_path, 'archives')
+                new_folder = folder_path / 'archives'
+                scan.scan(new_folder)
+                for file in archive_files:
+                    handle_archive(file, new_folder, 'archives')
+
 
     for file in scan.others:
             handle_file(file, folder_path, "other")
@@ -81,9 +81,9 @@ if __name__ == '__main__':
     folder = Path(path)
 
     main(folder.resolve())
-    for item in folder.iterdir():
+    for item in os.walk(folder):
         print(item.name, end=' ')
-        for file in item.iterdir():
+        for file in os.walk(item):
             print(file.name, end=" ")
         print("")
 
