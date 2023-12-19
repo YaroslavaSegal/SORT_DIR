@@ -1,7 +1,7 @@
 import sys
 import shutil
 from pathlib import Path
-import os
+
 import scan
 import normalize
 
@@ -24,7 +24,7 @@ def handle_archive(path, root_folder, dist):
     archive_folder.mkdir(exist_ok=True)
 
     try:
-        shutil.unpack_archive(str(path.resolve()), str(archive_folder.resolve()))
+        shutil.unpack_archive(path, archive_folder)
     except shutil.ReadError:
         archive_folder.rmdir()
         return
@@ -32,6 +32,7 @@ def handle_archive(path, root_folder, dist):
         archive_folder.rmdir()
         return
     path.unlink()
+
 
 def remove_empty_folders(path):
     for item in path.iterdir():
@@ -42,18 +43,8 @@ def remove_empty_folders(path):
             except OSError:
                 pass
 
-non_empty = list()
-def nonempty(folder):
-    global non_empty
-    for elem in folder.iterdir():
-        if len(os.listdir(elem)) == 0:
-            remove_empty_folders(elem)
-        else:
-            non_empty.append(elem)
-            nonempty(elem)
-    return non_empty
 
-def main(folder_path, root_folder):
+def main(folder_path):
     # print(folder_path)
     scan.scan(folder_path)
     images_files = scan.jpeg_files + scan.jpg_files + scan.png_files + scan.svg_files
@@ -61,29 +52,14 @@ def main(folder_path, root_folder):
     audio_files = scan.mp3_files + scan.ogg_files + scan.wav_files + scan.amr_files
     video_files = scan.avi_files + scan.mp4_files + scan.mov_files + scan.mkv_files
     archive_files = scan.zip_files + scan.gz_files + scan.tar_files
-
     known_extension = images_files + documents_files + audio_files + video_files + archive_files
-
-    dict_files = {"images": images_files, "documents": documents_files, 'audio': audio_files, 'video': video_files}
-
-    for file in known_extension:
-        for key, value in dict_files.items():
-            if file in value:
-                handle_file(file, root_folder, key)
-            elif file in archive_files:
-                handle_archive(file, root_folder, 'archives')
-    for file in scan.others:
-        handle_file(file, root_folder, "other")
-
-    if len(os.listdir(folder_path)) == 0:
-        remove_empty_folders(folder_path)
-    else:
-        for element in folder_path:
-            if len(os.listdir(element)) == 0:
-                remove_empty_folders(element)
-            while len(os.listdir(element)) != 0:
-                main(element, root_folder)
-            remove_empty_folders(element)
+    dict_files = {"images": images_files, "documents": documents_files, 'audio': audio_files, 'video': video_files, 'other': scan.others}
+    for key, value in dict_files.items():
+        for file in value:
+            handle_file(file, folder_path, key)
+    for file in archive_files:
+        handle_archive(file, folder_path, 'archives')
+    remove_empty_folders(folder_path)
 
 
 if __name__ == '__main__':
@@ -92,7 +68,7 @@ if __name__ == '__main__':
 
     folder = Path(path)
 
-    main(folder.resolve(), folder.resolve())
+    main(folder.resolve())
     for item in folder.iterdir():
         print(item.name, end=' ')
         for file in item.iterdir():
